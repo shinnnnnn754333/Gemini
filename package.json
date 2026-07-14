@@ -1,17 +1,13 @@
 {
-  "name": "sai-bot-sieucap",
+  "name": "SAI",
   "version": "1.0.0",
-  "description": "Discord Bot chạy Gemini AI siêu dài siêu mượt",
+  "description": "Bot Discord SAI chửi thề tấu hài",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.15.3",
-    "@google/generative-ai": "^0.11.1"
-  },
-  "engines": {
-    "node": ">=18.20.8"
+    "@google/generative-ai": "latest",
+    "discord.js": "latest"
   }
 }
-

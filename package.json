@@ -1,11 +1,12 @@
 {
-  "name": "gemini-bot",
+  "name": "SAI",
   "version": "1.0.0",
   "main": "index.js",
-  "dependencies": {
-    "discord.js": "^14.15.3"
-  },
   "scripts": {
     "start": "node index.js"
+  },
+  "dependencies": {
+    "discord.js": "^14.15.0",
+    "@google/generative-ai": "^0.15.0"
   }
 }

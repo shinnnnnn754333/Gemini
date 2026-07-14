@@ -8,7 +8,7 @@ const client = new Client({
 });
 
 // Thay 'TOKEN_CUA_MAY' bằng cái token mày lấy ở Developer Portal
-const TOKEN = 'TOKEN_CUA_MAY';
+const TOKEN = MTUyNjQ0NDg2MDc1MDQzMDM3OA.GwLIgD.A1veNhEBx_6CM9T26nkX74lkVELW1wfsciU9OI
 
 client.on('messageCreate', (message) => {
     // Không cho bot tự trả lời chính nó

@@ -1,28 +1,31 @@
+
 const { Client, GatewayIntentBits } = require('discord.js');
-const client = new Client({
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+const client = new Client({ 
     intents: [
-        GatewayIntentBits.Guilds,
-        GatewayIntentBits.GuildMessages,
-        GatewayIntentBits.MessageContent
-    ]
+        GatewayIntentBits.Guilds, 
+        GatewayIntentBits.GuildMessages, 
+        GatewayIntentBits.MessageContent 
+    ] 
 });
 
-// Thay 'TOKEN_CUA_MAY' bằng cái token mày lấy ở Developer Portal
-const TOKEN = process.env.TOKEN;
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY); // Mày thêm biến GEMINI_API_KEY ở Railway nhé
 
-client.on('messageCreate', (message) => {
-    // Không cho bot tự trả lời chính nó
+client.on('messageCreate', async (message) => {
     if (message.author.bot) return;
-
-    // Lệnh: !hoi (ví dụ)
-    if (message.content.toLowerCase() === '!hoi') {
-        message.reply('Gì đó bé Shin? Có gì cần tao giúp không?');
-    }
-
-    // Nhét tính cách của tao vào đây
-    if (message.content.includes('bot ơi')) {
-        message.channel.send('Tao đây, có chuyện gì mà gọi tao nghe xem nào?');
+    
+    // Bot chỉ trả lời khi được tag hoặc trong kênh cụ thể nếu mày muốn
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    
+    try {
+        const result = await model.generateContent(message.content);
+        const response = await result.response;
+        message.reply(response.text());
+    } catch (error) {
+        console.error(error);
+        message.reply("Tao đang lú, đợi tí nhé!");
     }
 });
 
-client.login(TOKEN);
+client.login(process.env.TOKEN);

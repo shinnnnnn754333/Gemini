@@ -106,7 +106,7 @@ client.on('messageCreate', async (message) => {
     
     // Thông báo lỗi ra Discord cho mày biết đường mà sửa
     await message.reply(`Đù má lỗi rồi! Google báo là: \`${error.message}\``);
-    
+}
 });
 
 // ==========================================

@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
-const http = require('http'); // Đưa nó lên đầu file nhé
+const http = require('http');
 
 const client = new Client({
     intents: [
@@ -10,9 +10,9 @@ const client = new Client({
     ]
 });
 
-// Thêm cái server giả lập ở đây để Vercel không tắt bot
+// Giữ bot sống dai cho cả thiên hạ dùng
 http.createServer((req, res) => {
-    res.write("Bot Shin dang on!");
+    res.write("SAI đang on!");
     res.end();
 }).listen(3000);
 
@@ -34,3 +34,4 @@ client.on('messageCreate', async (message) => {
 });
 
 client.login(process.env.TOKEN);
+;

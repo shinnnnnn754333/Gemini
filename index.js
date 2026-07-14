@@ -1,8 +1,7 @@
 // ==========================================
-// 1. KHAI BÁO CÁC THƯ VIỆN CẦN THIẾT
+// 1. KHAI BÁO THƯ VIỆN (VỨT BỎ @google/generative-ai)
 // ==========================================
 const { Client, GatewayIntentBits } = require('discord.js');
-const { GoogleGenerativeAI } = require('@google/generative-ai');
 const http = require('http');
 
 // ==========================================
@@ -22,47 +21,34 @@ const client = new Client({
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.write("Bot SAI phế vật đã được thông não thành công!");
+  res.write("Bot SAI đã vứt sọt rác cái SDK của Google, chạy API tay!");
   res.end();
 }).listen(port, () => {
   console.log(`[SERVER] Port đang chạy: ${port}`);
 });
 
 // ==========================================
-// 4. KẾT NỐI VỚI GEMINI AI (ÉP BUỘC CHẠY V1)
+// 4. BỘ NHỚ VÀ TÍNH CÁCH
 // ==========================================
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY, { apiVersion: 'v1' });
-
-// Dùng mô hình chuẩn đời mới
-const model = genAI.getGenerativeModel({ 
-  model: "gemini-1.5-flash"
-});
-
-// Bộ nhớ lưu lịch sử chat cho từng người
 const chatHistories = new Map();
-
-// Định hình tính cách cho con bot
 const SYSTEM_INSTRUCTION = "Mày tên là SAI, một trợ lý AI siêu ngầu, cá tính. Mày phải xưng hô 'mày' và 'tao' với người dùng. Cách nói chuyện của mày phải có vài phần tục tĩu, hài hước, thô lỗ nhưng thật lòng. Tuyệt đối không được nói chuyện kiểu máy móc hay nghiêm túc.";
 
-// ==========================================
-// 5. SỰ KIỆN KHI BOT ONLINE
-// ==========================================
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI quốc dân đã sẵn sàng!`);
+  console.log(`[ONLINE] Bot SAI bộc phá đã sẵn sàng!`);
 });
 
 // ==========================================
-// 6. XỬ LÝ TIN NHẮN TRONG SERVER
+// 5. XỬ LÝ TIN NHẮN (GỌI THẲNG API BẰNG FETCH)
 // ==========================================
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
 
-  // ĐIỀU KIỆN: Phải tag con bot (@SAI) thì nó mới trả lời
+  // Bắt buộc tag @SAI mới trả lời
   if (!message.mentions.has(client.user)) return;
 
   const userId = message.author.id;
   
-  // Xóa đoạn tag @bot trong câu tin nhắn
+  // Dọn dẹp cái tag ra khỏi tin nhắn
   const userContent = message.content.replace(`<@!${client.user.id}>`, '').replace(`<@${client.user.id}>`, '').trim();
 
   if (!userContent) {
@@ -73,39 +59,53 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
 
-    // Nếu người dùng chat lần đầu, tạo mảng lịch sử mới
+    // Tạo lịch sử chat nếu chưa có
     if (!chatHistories.has(userId)) {
       chatHistories.set(userId, []);
     }
-
     const history = chatHistories.get(userId);
     
-    // Thêm câu hỏi mới của user vào lịch sử
+    // Nạp câu hỏi của user vào mảng lịch sử
     history.push({ role: "user", parts: [{ text: userContent }] });
-
-    // Giới hạn lịch sử lưu tối đa 20 câu gần nhất để tránh tràn bộ nhớ
     if (history.length > 20) history.shift();
 
-    // Gọi trực tiếp generateContent (Bỏ qua startChat lỗi của Google)
-    const result = await model.generateContent({
-      contents: history,
-      systemInstruction: SYSTEM_INSTRUCTION,
-      generationConfig: {
-        maxOutputTokens: 1500,
-        temperature: 0.7,
-      }
+    // ----------------------------------------------------
+    // GỌI TRỰC TIẾP API BẰNG TAY (ÉP LINK V1 CHÍNH THỨC)
+    // ----------------------------------------------------
+    const API_KEY = process.env.GEMINI_API_KEY;
+    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+
+    const response = await fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        contents: history,
+        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+        generationConfig: {
+          maxOutputTokens: 1500,
+          temperature: 0.7,
+        }
+      })
     });
 
-    const responseText = result.response.text();
+    const data = await response.json();
 
-    if (!responseText) {
-      await message.reply("Đù má nghẹn não rồi, nhắn lại cái xem!");
-      return;
+    // Check xem Google có quăng lỗi gì không
+    if (data.error) {
+      throw new Error(data.error.message);
     }
 
-    // Thêm câu trả lời của bot vào lịch sử để nhớ ngữ cảnh
-    history.push({ role: "model", parts: [{ text: responseText }] });
+    // Lấy câu trả lời ra
+    if (!data.candidates || !data.candidates[0] || !data.candidates[0].content) {
+      throw new Error("Dữ liệu từ Google trả về bị rỗng mẹ rồi!");
+    }
 
+    const responseText = data.candidates[0].content.parts[0].text;
+
+    // Lưu câu trả lời vào lịch sử
+    history.push({ role: "model", parts: [{ text: responseText }] });
     await message.reply(responseText);
 
   } catch (error) {
@@ -115,4 +115,3 @@ client.on('messageCreate', async (message) => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-  

@@ -1,7 +1,7 @@
 {
-  "name": "SAI",
+  "name": "sai-bot-sieucap",
   "version": "1.0.0",
-  "description": "Discord Bot sử dụng Gemini API",
+  "description": "Discord Bot chạy Gemini AI siêu dài siêu mượt",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
@@ -11,6 +11,7 @@
     "@google/generative-ai": "^0.11.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=18.20.8"
   }
 }
+

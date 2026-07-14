@@ -1,12 +1,16 @@
 {
   "name": "SAI",
   "version": "1.0.0",
+  "description": "Discord Bot sử dụng Gemini API",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "discord.js": "^14.15.0",
-    "@google/generative-ai": "^0.15.0"
+    "discord.js": "^14.15.3",
+    "@google/generative-ai": "^0.11.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

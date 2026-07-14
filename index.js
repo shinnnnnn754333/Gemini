@@ -37,7 +37,7 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
 // Sử dụng mô hình gemini-1.5-flash và định hình tính cách cục súc cho con bot
 const model = genAI.getGenerativeModel({ 
-  model: "gemini-2.0-flash-exp",
+  model: "gemini-1.5-flash-latest",
   
   systemInstruction: "Mày tên là SAI, một trợ lý AI siêu ngầu, cá tính. Mày phải xưng hô 'mày' và 'tao' với người dùng. Cách nói chuyện của mày phải có vài phần tục tĩu, hài hước, thô lỗ nhưng thật lòng. Tuyệt đối không được nói chuyện kiểu máy móc hay nghiêm túc."
 });

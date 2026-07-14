@@ -105,8 +105,8 @@ client.on('messageCreate', async (message) => {
     console.error("[LỖI XỬ LÝ]:", error);
     
     // Thông báo lỗi ra Discord cho mày biết đường mà sửa
-    await message.reply("Đù má, có lỗi gì rồi bé Shin ơi! Check lại log trên Railway hoặc xem lại cái GEMINI_API_KEY giùm tao cái!");
-  }
+    await message.reply(`Đù má lỗi rồi! Google báo là: \`${error.message}\``);
+    
 });
 
 // ==========================================

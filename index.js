@@ -82,7 +82,8 @@ client.on('messageCreate', async (message) => {
       },
       body: JSON.stringify({
         contents: history,
-        systemInstruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+        // SỬA LỖI CHÍNH TẢ CHO THẰNG GOOGLE: Chuyển thành system_instruction
+        system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
         generationConfig: {
           maxOutputTokens: 1500,
           temperature: 0.7,
@@ -115,3 +116,4 @@ client.on('messageCreate', async (message) => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
+                             

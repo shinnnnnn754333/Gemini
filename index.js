@@ -1,6 +1,6 @@
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
-const axios = require('axios'); // Đã chuyển sang dùng axios để trị lỗi fetch failed
+const axios = require('axios');
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
@@ -8,7 +8,7 @@ const client = new Client({
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI Hugging Face Axios dang chay!");
+  res.write("Bot SAI Hugging Face Free dang chay!");
   res.end();
 }).listen(port);
 
@@ -26,15 +26,15 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  // Lần đầu chat thì kích hoạt chào và báo hoạt động
+  // Khởi tạo lịch sử và thông báo ban đầu
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
       { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn rồi bắt đầu chat." },
-      { role: "assistant", content: "SAI đã hoạt động" }
+      { role: "assistant", content: "SAI đã hoạt động! Được rồi ông nội, tao là SAI. Cứ nói chuyện kiểu mày tao tục tĩu đi, tao cân hết!" }
     ]);
     
     await message.channel.sendTyping();
-    await message.reply("SAI đã hoạt động! Kêu tao có việc gì đéo nói lẹ đi?");
+    await message.reply("SAI đã hoạt động! Kêu tao có việc gì, nói lẹ đi?");
     return;
   }
   
@@ -44,9 +44,9 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-    // Dùng axios post dữ liệu an toàn, đéo lo kén node version
+    // Đổi sang endpoint Serverless API chuẩn của Hugging Face để tránh lỗi DNS
     const response = await axios.post(
-      'https://api-inference.huggingface.co/models/meta-llama/Meta-Llama-3-8B-Instruct/v1/chat/completions',
+      'https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1/chat/completions',
       {
         messages: history,
         max_tokens: 500
@@ -55,7 +55,8 @@ client.on('messageCreate', async (message) => {
         headers: { 
           'Authorization': `Bearer ${process.env.HF_TOKEN}`,
           'Content-Type': 'application/json'
-        }
+        },
+        timeout: 15000 // Tự động ngắt nếu mạng quá 15 giây để tránh treo bot
       }
     );
 
@@ -70,16 +71,17 @@ client.on('messageCreate', async (message) => {
     message.reply(replyText);
   } catch (e) {
     console.error(e);
-    const errorMsg = e.response && e.response.data && e.response.data.error 
-      ? (e.response.data.error.message || JSON.stringify(e.response.data.error)) 
-      : e.message;
+    let errorMsg = e.message;
+    if (e.response && e.response.data && e.response.data.error) {
+      errorMsg = e.response.data.error.message || JSON.stringify(e.response.data.error);
+    }
     message.reply("Đù má, Hugging Face lỗi rồi: " + errorMsg);
   }
 });
 
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI (Axios HF) sẵn sàng!`);
+  console.log(`[ONLINE] Bot SAI sẵn sàng!`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
-                
+      

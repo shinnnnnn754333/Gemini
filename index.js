@@ -1,50 +1,77 @@
 const { Client, GatewayIntentBits } = require('discord.js');
+const { OpenAI } = require('openai');
 const http = require('http');
+
+// Khởi tạo OpenAI
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
+// Giữ bot sống trên Railway
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI - Đã fix lỗi JSON!");
+  res.write("Bot SAI OpenAI version đang chay!");
   res.end();
 }).listen(port);
 
 const chatHistories = new Map();
-// Tính cách bot nằm ở đây
-const PERSONALITY = "Mày tên là SAI, một trợ lý AI siêu ngầu, cá tính. Mày phải xưng hô 'mày' và 'tao' với người dùng. Cách nói chuyện của mày phải có vài phần tục tĩu, hài hước, thô lỗ nhưng thật lòng. Tuyệt đối không được nói chuyện kiểu máy móc.";
+// Tính cách siêu gắt của SAI
+const PERSONALITY = "Mày tên là SAI, một trợ lý AI siêu ngầu, cá tính. Mày xưng hô 'mày' và 'tao' với người dùng. Cách nói chuyện của mày phải có vài phần tục tĩu, hài hước, thô lỗ nhưng thật lòng. Tuyệt đối không được nói chuyện kiểu máy móc.";
 
 client.on('messageCreate', async (message) => {
+  // Bỏ qua tin nhắn của bot khác hoặc không tag bot
   if (message.author.bot || !message.mentions.has(client.user)) return;
 
   const userId = message.author.id;
   const userContent = message.content.replace(/<@!?\d+>/g, '').trim();
 
+  if (!userContent) {
+    await message.reply("Tag tao làm đéo gì? Nói chuyện coi!");
+    return;
+  }
+
+  // Nếu chưa có lịch sử, tạo mới và nhét tính cách vào system prompt
   if (!chatHistories.has(userId)) {
-    // Nạp tính cách vào tin nhắn đầu tiên của lịch sử thay vì dùng systemInstruction
-    chatHistories.set(userId, [{ role: "user", parts: [{ text: PERSONALITY + "\n\nBắt đầu hội thoại ngay bây giờ." }] }]);
+    chatHistories.set(userId, [
+      { role: "system", content: PERSONALITY }
+    ]);
   }
   
   const history = chatHistories.get(userId);
-  history.push({ role: "user", parts: [{ text: userContent }] });
+  history.push({ role: "user", content: userContent });
 
   try {
     await message.channel.sendTyping();
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: history }) // Đẩy thẳng history đã có tính cách vào đây
+    
+    // Gọi API của OpenAI (dùng gpt-4o-mini cho mượt và rẻ)
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: history,
     });
 
-    const data = await response.json();
-    const replyText = data.candidates[0].content.parts[0].text;
+    const replyText = completion.choices[0].message.content;
     
-    history.push({ role: "model", parts: [{ text: replyText }] });
+    // Lưu câu trả lời vào lịch sử
+    history.push({ role: "assistant", content: replyText });
+    
+    // Giới hạn bộ nhớ để không bị tràn (giữ lại khoảng 10 tin nhắn gần nhất + 1 system prompt)
+    if (history.length > 11) {
+      history.splice(1, 2); 
+    }
+
     message.reply(replyText);
   } catch (e) {
-    message.reply("Đù má, lỗi rồi: " + e.message);
+    console.error(e);
+    message.reply("Đù má, OpenAI nó chửi lỗi rồi: " + e.message);
   }
+});
+
+client.once('ready', () => {
+  console.log(`[ONLINE] Bot SAI (OpenAI) đã sẵn sàng chiến!`);
 });
 
 client.login(process.env.DISCORD_TOKEN);

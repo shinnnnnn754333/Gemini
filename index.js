@@ -7,7 +7,7 @@ const client = new Client({
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI Gemini Flash moi nhat dang chay!");
+  res.write("Bot SAI Gemini 2.0 Free dang chay!");
   res.end();
 }).listen(port);
 
@@ -38,8 +38,8 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-    // ĐÃ ĐỔI: Chuyển sang model gemini-2.5-flash để hợp với key AQ mới tinh của mày
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    // Sử dụng gemini-2.0-flash chuẩn xác cho key AQ mới
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ contents: history })
@@ -67,8 +67,8 @@ client.on('messageCreate', async (message) => {
 });
 
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI (Gemini 2.5) sẵn sàng!`);
+  console.log(`[ONLINE] Bot SAI (Gemini 2.0) sẵn sàng!`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
-                
+      

@@ -8,13 +8,13 @@ const client = new Client({
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI Groq dang chay sieu toc!");
+  res.write("Bot SAI nu dang yeu dang chay!");
   res.end();
 }).listen(port);
 
 const chatHistories = new Map();
-// Đã thay đổi tính cách xưng hô sang mình, tớ - bạn, cậu nhưng vẫn lầy lội, hài hước và có tí tục tĩu vui vẻ
-const PERSONALITY = "Mày tên là SAI, một trợ lý AI siêu ngầu, cá tính, cực kỳ hài hước và có vài phần lầy lội, tục tĩu vui vẻ. Mày BẮT BUỘC phải xưng là 'mình' hoặc 'tớ' và gọi người dùng là 'bạn' hoặc 'cậu' trong mọi câu trả lời. Cách nói chuyện của mày phải thân thiện kiểu học đường, hài hước lầy lội, thi thoảng đệm vài từ tục vui vẻ (như vcl, đù má, ông nội) nhưng tuyệt đối không xưng hô mày-tao hay anh-em nữa.";
+// Tính cách mới: Nữ, dễ thương, lầy lội, bớt tục, xưng tớ/mình - cậu/bạn
+const PERSONALITY = "Bạn tên là SAI, một cô nàng trợ lý AI siêu đáng yêu, cá tính và cực kỳ lầy lội, bướng bỉnh. Bạn là NỮ (con gái). Bạn BẮT BUỘC phải xưng là 'mình' hoặc 'tớ' và gọi người dùng là 'bạn' hoặc 'cậu' trong mọi câu trả lời. Cách nói chuyện của bạn phải thân thiện kiểu học sinh, hài hước, thỉnh thoảng đùa dai hay chọc ghẹo lầy lội một chút cho vui, tuyệt đối KHÔNG nói tục chửi thề quá đà, không xưng mày-tao hay anh-em.";
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.mentions.has(client.user)) return;
@@ -23,19 +23,19 @@ client.on('messageCreate', async (message) => {
   const userContent = message.content.replace(/<@!?\d+>/g, '').trim();
 
   if (!userContent) {
-    await message.reply("Tag tớ làm đéo gì? Nói chuyện coi bạn ơi!");
+    await message.reply("Tag tớ làm gì thế? Có chuyện gì thì nói nhanh đi cậu ơi! :D");
     return;
   }
 
   // Lần đầu nhắn tin thì kích hoạt câu chào hoạt động
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
-      { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách và cách xưng hô mới chưa? Trả lời ngắn gọn rồi bắt đầu chat." },
-      { role: "assistant", content: "SAI đã hoạt động! Được rồi bạn ơi, tớ là SAI đây. Cứ nói chuyện kiểu cậu tớ lầy lội chút đi, mình cân hết!" }
+      { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách, giới tính nữ và cách xưng hô mới chưa? Trả lời ngắn gọn rồi bắt đầu chat." },
+      { role: "assistant", content: "SAI đã hoạt động! Hi cậu nha, tớ là SAI đây. Cứ nói chuyện thoải mái với tớ nha, mình cùng quẩy nè!" }
     ]);
     
     await message.channel.sendTyping();
-    await message.reply("SAI đã hoạt động! Kêu tớ có việc gì đéo nói lẹ đi cậu ơi?");
+    await message.reply("SAI đã hoạt động rồi nè! Kêu tớ có việc gì thế cậu ơi? nhắn lẹ đi nè~");
     return;
   }
   
@@ -76,12 +76,13 @@ client.on('messageCreate', async (message) => {
     if (e.response && e.response.data && e.response.data.error) {
       errorMsg = e.response.data.error.message || JSON.stringify(e.response.data.error);
     }
-    message.reply("Đù má, hệ thống lỗi rồi bạn ơi: " + errorMsg);
+    message.reply("Hic, hình như tớ bị lỗi gì rồi cậu ơi: " + errorMsg);
   }
 });
 
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI (Groq) sẵn sàng bốc lửa!`);
+  console.log(`[ONLINE] Bot SAI Nữ (Groq) đã sẵn sàng!`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
+                                                  

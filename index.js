@@ -44,11 +44,11 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-    // Đã đổi sang model Llama 3.3 70B mới nhất cực mạnh của Groq
+    // Đã đổi sang model Llama 3.3 70B Versatile chuẩn chỉ nhất của Groq
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama-3.3-70b-specdec',
+        model: 'llama-3.3-70b-versatile',
         messages: history,
         max_tokens: 500
       },

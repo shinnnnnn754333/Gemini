@@ -5,9 +5,10 @@ const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.MessageContent]
 });
 
+// Giữ bot sống trên Railway
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI Gemini 2.0 Free dang chay!");
+  res.write("Bot SAI DuckDuckGo Free dang chay!");
   res.end();
 }).listen(port);
 
@@ -25,35 +26,41 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
+  // Khởi tạo lịch sử chat kiểu tin nhắn nối tiếp cho DuckDuckGo
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
-      { role: "user", parts: [{ text: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn rồi bắt đầu chat." }] },
-      { role: "model", parts: [{ text: "Được rồi ông nội, tao là SAI. Cứ nói chuyện kiểu mày tao tục tĩu đi, tao cân hết!" }] }
+      { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn rồi bắt đầu chat." },
+      { role: "assistant", content: "Được rồi ông nội, tao là SAI. Cứ nói chuyện kiểu mày tao tục tĩu đi, tao cân hết!" }
     ]);
   }
   
   const history = chatHistories.get(userId);
-  history.push({ role: "user", parts: [{ text: userContent }] });
+  history.push({ role: "user", content: userContent });
 
   try {
     await message.channel.sendTyping();
     
-    // Sử dụng gemini-2.0-flash chuẩn xác cho key AQ mới
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`, {
+    // Gọi API qua proxy DuckDuckGo AI (Bản Llama-3-70b siêu thông minh)
+    const response = await fetch('https://ai.fakeopen.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ contents: history })
+      headers: { 
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo',
+        messages: history
+      })
     });
 
     const data = await response.json();
     
-    if (data.error) {
-      throw new Error(data.error.message);
+    if (!data.choices || data.choices.length === 0) {
+      throw new Error("API đéo trả về chữ nào hết!");
     }
 
-    const replyText = data.candidates[0].content.parts[0].text;
+    const replyText = data.choices[0].message.content;
     
-    history.push({ role: "model", parts: [{ text: replyText }] });
+    history.push({ role: "assistant", content: replyText });
     
     if (history.length > 12) {
       history.splice(2, 2); 
@@ -62,13 +69,12 @@ client.on('messageCreate', async (message) => {
     message.reply(replyText);
   } catch (e) {
     console.error(e);
-    message.reply("Đù má, Gemini lỗi rồi: " + e.message);
+    message.reply("Đù má, hệ thống bất tử cũng lỗi: " + e.message);
   }
 });
 
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI (Gemini 2.0) sẵn sàng!`);
+  console.log(`[ONLINE] Bot SAI (DuckDuckGo AI Free) sẵn sàng!`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
-      

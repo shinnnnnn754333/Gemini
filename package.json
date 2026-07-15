@@ -1,13 +1,4 @@
-{
-  "name": "SAI",
-  "version": "1.0.0",
-  "description": "Bot Discord SAI chửi thề tấu hài",
-  "main": "index.js",
-  "scripts": {
-    "start": "node index.js"
-  },
   "dependencies": {
-    "@google/generative-ai": "latest",
-    "discord.js": "latest"
+    "discord.js": "^14.14.1",
+    "openai": "^4.0.0"
   }
-}

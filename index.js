@@ -44,11 +44,11 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-    // Gọi lên server Groq chạy Llama 3 70B với tốc độ bàn thờ
+    // Đã đổi sang model Llama 3.3 70B mới nhất cực mạnh của Groq
     const response = await axios.post(
       'https://api.groq.com/openai/v1/chat/completions',
       {
-        model: 'llama3-70b-8192',
+        model: 'llama-3.3-70b-specdec',
         messages: history,
         max_tokens: 500
       },

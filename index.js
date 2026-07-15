@@ -1,5 +1,5 @@
 // ==========================================
-// 1. KHAI BÁO THƯ VIỆN (VỨT BỎ @google/generative-ai)
+// 1. KHAI BÁO THƯ VIỆN
 // ==========================================
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
@@ -21,7 +21,7 @@ const client = new Client({
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.write("Bot SAI đã vứt sọt rác cái SDK của Google, chạy API tay!");
+  res.write("Bot SAI phiên bản API thuần đã sửa lỗi system instruction!");
   res.end();
 }).listen(port, () => {
   console.log(`[SERVER] Port đang chạy: ${port}`);
@@ -70,7 +70,7 @@ client.on('messageCreate', async (message) => {
     if (history.length > 20) history.shift();
 
     // ----------------------------------------------------
-    // GỌI TRỰC TIẾP API BẰNG TAY (ÉP LINK V1 CHÍNH THỨC)
+    // GỌI TRỰC TIẾP API BẰNG TAY (CẤU TRÚC JSON CHUẨN V1)
     // ----------------------------------------------------
     const API_KEY = process.env.GEMINI_API_KEY;
     const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
@@ -82,8 +82,12 @@ client.on('messageCreate', async (message) => {
       },
       body: JSON.stringify({
         contents: history,
-        // SỬA LỖI CHÍNH TẢ CHO THẰNG GOOGLE: Chuyển thành system_instruction
-        system_instruction: { parts: [{ text: SYSTEM_INSTRUCTION }] },
+        // CẤU TRÚC ĐÚNG: systemInstruction phải bọc thế này mới chịu
+        systemInstruction: {
+          parts: [
+            { text: SYSTEM_INSTRUCTION }
+          ]
+        },
         generationConfig: {
           maxOutputTokens: 1500,
           temperature: 0.7,
@@ -115,5 +119,6 @@ client.on('messageCreate', async (message) => {
   }
 });
 
+client.on('error', console.error);
+
 client.login(process.env.DISCORD_TOKEN);
-                             

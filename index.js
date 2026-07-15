@@ -21,7 +21,7 @@ const client = new Client({
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' });
-  res.write("Bot SAI phiên bản API thuần đã sửa lỗi system instruction!");
+  res.write("Bot SAI - Đã gỡ lời nguyền API v1beta và 404!");
   res.end();
 }).listen(port, () => {
   console.log(`[SERVER] Port đang chạy: ${port}`);
@@ -38,7 +38,7 @@ client.once('ready', () => {
 });
 
 // ==========================================
-// 5. XỬ LÝ TIN NHẮN (GỌI THẲNG API BẰNG FETCH)
+// 5. XỬ LÝ TIN NHẮN (API TAY)
 // ==========================================
 client.on('messageCreate', async (message) => {
   if (message.author.bot) return;
@@ -70,10 +70,12 @@ client.on('messageCreate', async (message) => {
     if (history.length > 20) history.shift();
 
     // ----------------------------------------------------
-    // GỌI TRỰC TIẾP API BẰNG TAY (CẤU TRÚC JSON CHUẨN V1)
+    // CÚ CHỐT: XÀI V1BETA NHƯNG ĐỔI TÊN MODEL THÀNH LATEST
     // ----------------------------------------------------
     const API_KEY = process.env.GEMINI_API_KEY;
-    const url = `https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`;
+    
+    // ĐỔI LINK Ở ĐÂY: Dùng v1beta và model gemini-1.5-flash-latest
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=${API_KEY}`;
 
     const response = await fetch(url, {
       method: 'POST',
@@ -82,11 +84,8 @@ client.on('messageCreate', async (message) => {
       },
       body: JSON.stringify({
         contents: history,
-        // CẤU TRÚC ĐÚNG: systemInstruction phải bọc thế này mới chịu
         systemInstruction: {
-          parts: [
-            { text: SYSTEM_INSTRUCTION }
-          ]
+          parts: [{ text: SYSTEM_INSTRUCTION }]
         },
         generationConfig: {
           maxOutputTokens: 1500,
@@ -122,3 +121,4 @@ client.on('messageCreate', async (message) => {
 client.on('error', console.error);
 
 client.login(process.env.DISCORD_TOKEN);
+    

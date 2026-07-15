@@ -8,7 +8,7 @@ const client = new Client({
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI Hugging Face Free dang chay!");
+  res.write("Bot SAI Groq dang chay sieu toc!");
   res.end();
 }).listen(port);
 
@@ -26,7 +26,7 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  // Khởi tạo lịch sử và thông báo ban đầu
+  // Lần đầu nhắn tin thì kích hoạt câu chào hoạt động
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
       { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn rồi bắt đầu chat." },
@@ -34,7 +34,7 @@ client.on('messageCreate', async (message) => {
     ]);
     
     await message.channel.sendTyping();
-    await message.reply("SAI đã hoạt động! Kêu tao có việc gì, nói lẹ đi?");
+    await message.reply("SAI đã hoạt động! Kêu tao có việc gì đéo nói lẹ đi?");
     return;
   }
   
@@ -44,19 +44,20 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-    // Đổi sang endpoint Serverless API chuẩn của Hugging Face để tránh lỗi DNS
+    // Gọi lên server Groq chạy Llama 3 70B với tốc độ bàn thờ
     const response = await axios.post(
-      'https://api-inference.huggingface.co/models/Qwen/Qwen2.5-72B-Instruct/v1/chat/completions',
+      'https://api.groq.com/openai/v1/chat/completions',
       {
+        model: 'llama3-70b-8192',
         messages: history,
         max_tokens: 500
       },
       {
         headers: { 
-          'Authorization': `Bearer ${process.env.HF_TOKEN}`,
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
           'Content-Type': 'application/json'
         },
-        timeout: 15000 // Tự động ngắt nếu mạng quá 15 giây để tránh treo bot
+        timeout: 10000
       }
     );
 
@@ -75,13 +76,12 @@ client.on('messageCreate', async (message) => {
     if (e.response && e.response.data && e.response.data.error) {
       errorMsg = e.response.data.error.message || JSON.stringify(e.response.data.error);
     }
-    message.reply("Đù má, Hugging Face lỗi rồi: " + errorMsg);
+    message.reply("Đù má, Groq lỗi rồi: " + errorMsg);
   }
 });
 
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI sẵn sàng!`);
+  console.log(`[ONLINE] Bot SAI (Groq) sẵn sàng bốc lửa!`);
 });
 
 client.login(process.env.DISCORD_TOKEN);
-      

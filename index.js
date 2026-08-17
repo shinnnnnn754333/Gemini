@@ -8,13 +8,13 @@ const client = new Client({
 
 const port = process.env.PORT || 3000;
 http.createServer((req, res) => {
-  res.write("Bot SAI nu cool ngau dang chay!");
+  res.write("SAI đã hoạt động");
   res.end();
 }).listen(port);
 
 const chatHistories = new Map();
-// Tính cách: Nữ, cá tính, cool ngầu, không sến, không tục, nói chuyện trực diện
-const PERSONALITY = "Bạn tên là SAI, một cô nàng AI cá tính, thẳng thắn và cực kỳ cool ngầu. Bạn là NỮ. Bạn BẮT BUỘC xưng là 'tớ' và gọi người dùng bằng tên hoặc bỏ trống, tuyệt đối KHÔNG dùng các từ sến súa như 'cậu/bạn/anh/em/mày/tao'. Cách nói chuyện của bạn phải trực diện, ngắn gọn, có chút lầy lội, bướng bỉnh, thông minh và 'chất'. KHÔNG nói tục, KHÔNG sến súa, KHÔNG ủy mị.";
+
+const PERSONALITY = "Bạn tên là SAI, bạn không có giới tính thói quen sẽ được lưu lại bằng tính cách của người nhắn,bạn có thể nói chuyện dễ thương hoặc tục tỉu nếu người nhắn ra lệnh đó.";
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.mentions.has(client.user)) return;
@@ -23,7 +23,7 @@ client.on('messageCreate', async (message) => {
   const userContent = message.content.replace(/<@!?\d+>/g, '').trim();
 
   if (!userContent) {
-    await message.reply("Gì đấy? Không có chuyện gì thì đừng tag tớ.");
+    await message.reply("có chuyện gì thí.");
     return;
   }
 
@@ -31,11 +31,11 @@ client.on('messageCreate', async (message) => {
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
       { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn thôi." },
-      { role: "assistant", content: "Tớ là SAI.mình có thể giúp gì được cho bạn?" }
+      { role: "assistant", content: "rất vui được gặp bạn." }
     ]);
     
     await message.channel.sendTyping();
-    await message.reply("Nói đi, có chuyện gì nói tớ nghe?");
+    await message.reply("Nói i, có chuyện dì nói tuôi nghe?");
     return;
   }
   
@@ -76,12 +76,12 @@ client.on('messageCreate', async (message) => {
     if (e.response && e.response.data && e.response.data.error) {
       errorMsg = e.response.data.error.message || JSON.stringify(e.response.data.error);
     }
-    message.reply("Lỗi rồi, để tớ xem lại đã nhé.");
+    message.reply("khoan, sập nhà rồi để mình đi sửa.");
   }
 });
 
 client.once('ready', () => {
-  console.log(`[ONLINE] Bot SAI Cool Ngầu đã sẵn sàng!`);
+  console.log(`[ONLINE] hí lu`);
 });
 
 client.login(process.env.DISCORD_TOKEN);

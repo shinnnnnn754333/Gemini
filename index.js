@@ -76,7 +76,8 @@ client.on('messageCreate', async (message) => {
     if (e.response && e.response.data && e.response.data.error) {
       errorMsg = e.response.data.error.message || JSON.stringify(e.response.data.error);
     }
-    message.reply("khoan, sập nhà rồi để mình đi sửa.");
+    message.reply("sập nhà rồi , nguyên nhân" + errorMsg);
+ 
   }
 });
 

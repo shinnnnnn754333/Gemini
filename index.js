@@ -45,22 +45,22 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-    const response = await axios.post(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        model: 'llama3-8b-8192',
-        messages: history,
-        max_tokens: 500
-      },
-      {
-        headers: { 
-          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
-        timeout: 10000
-      }
-    );
-
+            const response = await axios.post(
+            'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+            {
+                model: 'gemini-2.5-flash',
+                messages: history,
+                max_tokens: 500
+            },
+            {
+                headers: {
+                    'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
+                    'Content-Type': 'application/json'
+                },
+                timeout: 10000
+            }
+        );
+      
     const replyText = response.data.choices[0].message.content;
     
     history.push({ role: "assistant", content: replyText });

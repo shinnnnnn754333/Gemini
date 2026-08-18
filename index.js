@@ -1,4 +1,4 @@
-require('dotenv').config(); // <-- THÊM DÒNG NÀY Ở ĐẦU FILE ĐỂ ĐỌC FILE .ENV
+require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
 const axios = require('axios');
@@ -14,7 +14,6 @@ http.createServer((req, res) => {
 }).listen(port);
 
 const chatHistories = new Map();
-
 const PERSONALITY = "Bạn tên là SAI, bạn không có giới tính thói quen sẽ được lưu lại bằng tính cách của người nhắn, bạn có thể nói chuyện dễ thương hoặc tục tỉu nếu người nhắn ra lệnh đó.";
 
 client.on('messageCreate', async (message) => {
@@ -28,11 +27,10 @@ client.on('messageCreate', async (message) => {
     return;
   }
 
-  // Lần đầu nhắn tin
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
-      { role: "user", content: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn thôi." },
-      { role: "assistant", content: "rất vui được gặp bạn." }
+      { role: "user", parts: [{ text: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn thôi." }] },
+      { role: "model", parts: [{ text: "rất vui được gặp bạn." }] }
     ]);
     
     await message.channel.sendTyping();
@@ -41,30 +39,26 @@ client.on('messageCreate', async (message) => {
   }
   
   const history = chatHistories.get(userId);
-  history.push({ role: "user", content: userContent });
+  history.push({ role: "user", parts: [{ text: userContent }] });
 
   try {
     await message.channel.sendTyping();
     
+    const apiKey = process.env.GEMINI_API_KEY;
     const response = await axios.post(
-      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
       {
-        model: 'gemini-1.5-flash',
-        messages: history,
-        max_tokens: 500
+        contents: history
       },
       {
-        headers: {
-          'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         timeout: 10000
       }
     );
       
-    const replyText = response.data.choices[0].message.content;
+    const replyText = response.data.candidates[0].content.parts[0].text;
     
-    history.push({ role: "assistant", content: replyText });
+    history.push({ role: "model", parts: [{ text: replyText }] });
     
     if (history.length > 12) {
       history.splice(2, 2); 
@@ -86,4 +80,4 @@ client.once('ready', () => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-                      
+  

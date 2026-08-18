@@ -1,3 +1,4 @@
+
 require('dotenv').config();
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
@@ -29,8 +30,9 @@ client.on('messageCreate', async (message) => {
 
   if (!chatHistories.has(userId)) {
     chatHistories.set(userId, [
-      { role: "user", parts: [{ text: PERSONALITY + "\n\nHiểu rõ tính cách chưa? Trả lời ngắn gọn thôi." }] },
-      { role: "model", parts: [{ text: "rất vui được gặp bạn." }] }
+      { role: "system", content: PERSONALITY },
+      { role: "user", content: "Hiểu rõ tính cách chưa? Trả lời ngắn gọn thôi." },
+      { role: "assistant", content: "rất vui được gặp bạn." }
     ]);
     
     await message.channel.sendTyping();
@@ -39,29 +41,33 @@ client.on('messageCreate', async (message) => {
   }
   
   const history = chatHistories.get(userId);
-  history.push({ role: "user", parts: [{ text: userContent }] });
+  history.push({ role: "user", content: userContent });
 
   try {
     await message.channel.sendTyping();
     
-    const apiKey = process.env.GEMINI_API_KEY;
     const response = await axios.post(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+      'https://api.groq.com/openai/v1/chat/completions',
       {
-        contents: history
+        model: 'llama-3.1-8b-instant',
+        messages: history,
+        max_tokens: 500
       },
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
         timeout: 10000
       }
     );
       
-    const replyText = response.data.candidates[0].content.parts[0].text;
+    const replyText = response.data.choices[0].message.content;
     
-    history.push({ role: "model", parts: [{ text: replyText }] });
+    history.push({ role: "assistant", content: replyText });
     
     if (history.length > 12) {
-      history.splice(2, 2); 
+      history.splice(1, 2); 
     }
 
     message.reply(replyText);
@@ -80,4 +86,3 @@ client.once('ready', () => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-  

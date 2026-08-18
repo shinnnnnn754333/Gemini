@@ -1,3 +1,4 @@
+require('dotenv').config(); // <-- THÊM DÒNG NÀY Ở ĐẦU FILE ĐỂ ĐỌC FILE .ENV
 const { Client, GatewayIntentBits } = require('discord.js');
 const http = require('http');
 const axios = require('axios');
@@ -14,7 +15,7 @@ http.createServer((req, res) => {
 
 const chatHistories = new Map();
 
-const PERSONALITY = "Bạn tên là SAI, bạn không có giới tính thói quen sẽ được lưu lại bằng tính cách của người nhắn,bạn có thể nói chuyện dễ thương hoặc tục tỉu nếu người nhắn ra lệnh đó.";
+const PERSONALITY = "Bạn tên là SAI, bạn không có giới tính thói quen sẽ được lưu lại bằng tính cách của người nhắn, bạn có thể nói chuyện dễ thương hoặc tục tỉu nếu người nhắn ra lệnh đó.";
 
 client.on('messageCreate', async (message) => {
   if (message.author.bot || !message.mentions.has(client.user)) return;
@@ -45,21 +46,21 @@ client.on('messageCreate', async (message) => {
   try {
     await message.channel.sendTyping();
     
-            const response = await axios.post(
-            'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
-            {
-                model: 'gemini-2.5-flash',
-                messages: history,
-                max_tokens: 500
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
-                    'Content-Type': 'application/json'
-                },
-                timeout: 10000
-            }
-        );
+    const response = await axios.post(
+      'https://generativelanguage.googleapis.com/v1beta/openai/chat/completions',
+      {
+        model: 'gemini-1.5-flash',
+        messages: history,
+        max_tokens: 500
+      },
+      {
+        headers: {
+          'Authorization': `Bearer ${process.env.GEMINI_API_KEY}`,
+          'Content-Type': 'application/json'
+        },
+        timeout: 10000
+      }
+    );
       
     const replyText = response.data.choices[0].message.content;
     
@@ -76,8 +77,7 @@ client.on('messageCreate', async (message) => {
     if (e.response && e.response.data && e.response.data.error) {
       errorMsg = e.response.data.error.message || JSON.stringify(e.response.data.error);
     }
-    message.reply("sập nhà rồi , nguyên nhân" + errorMsg);
- 
+    message.reply("sập nhà rồi , nguyên nhân: " + errorMsg);
   }
 });
 
@@ -86,4 +86,4 @@ client.once('ready', () => {
 });
 
 client.login(process.env.DISCORD_TOKEN);
-            
+                      
